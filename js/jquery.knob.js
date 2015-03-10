@@ -11,10 +11,7 @@
  * Thanks to vor, eskimoblood, spiffistan, FabrizioC
  */
 (function (factory) {
-    if (typeof exports === 'object') {
-        // CommonJS
-        module.exports = factory(require('jquery'));
-    } else if (typeof define === 'function' && define.amd) {
+    if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['jquery'], factory);
     } else {
@@ -26,7 +23,7 @@
     /**
      * Kontrol library
      */
-    "use strict";
+    // "use strict";
 
     /**
      * Definition of globals and core
@@ -152,14 +149,14 @@
                 this.i.each(function(k) {
                     var $this = $(this);
                     s.i[k] = $this;
-                    s.v[k] = s.o.parse($this.val());
-
+                    s.v[k] = s.o.parse($this.val(0,false));
+//debugger;
                     $this.bind(
                         'change blur',
                         function () {
                             var val = {};
-                            val[k] = $this.val();
-                            s.val(s._validate(val));
+                            val[k] = $this.val(0,false);
+                            s.val(s._validate(val),false);
                         }
                     );
                 });
@@ -173,7 +170,8 @@
                 this.$.bind(
                     'change blur',
                     function () {
-                        s.val(s._validate(s.o.parse(s.$.val())));
+                        // debugger;
+                        s.val(s._validate(s.o.parse(s.$.val())),false);
                     }
                 );
 
@@ -315,6 +313,7 @@
 
         this._touch = function (e) {
             var touchMove = function (e) {
+                //debugger;
                 var v = s.xy2val(
                             e.originalEvent.touches[s.t].pageX,
                             e.originalEvent.touches[s.t].pageY
@@ -333,15 +332,16 @@
 
             // First touch
             touchMove(e);
-
+//debugger;
             // Touch events listeners
             k.c.d
                 .bind("touchmove.k", touchMove)
                 .bind(
                     "touchend.k",
                     function () {
+                        //debugger;
                         k.c.d.unbind('touchmove.k touchend.k');
-                        s.val(s.cv);
+                        s.val(s.cv, true);
                     }
                 );
 
@@ -384,7 +384,7 @@
                     "mouseup.k",
                     function (e) {
                         k.c.d.unbind('mousemove.k mouseup.k keyup.k');
-                        s.val(s.cv);
+                        s.val(s.cv,true);
                     }
                 );
 
@@ -514,6 +514,7 @@
         };
 
         this.val = function (v, triggerRelease) {
+
             if (null != v) {
 
                 // reverse format
@@ -528,6 +529,10 @@
                 this.v = this.cv;
                 this.$.val(this.o.format(this.v));
                 this._draw();
+                if(triggerRelease && typeof this.rH === 'function')
+                {
+                    this.rH(this.$.val());
+                }
             } else {
                 return this.v;
             }
@@ -580,7 +585,7 @@
 
                     v = max(min(v, s.o.max), s.o.min);
 
-                    s.val(v, false);
+                    s.val(v, true);
 
                     if (s.rH) {
                         // Handle mousewheel stop
@@ -653,12 +658,14 @@
                 .bind(
                     "keyup",
                     function (e) {
+                        console.log('88888',e);
                         if (isNaN(kval)) {
                             if (to) {
                                 window.clearTimeout(to);
                                 to = null;
                                 m = 1;
-                                s.val(s.$.val());
+                                debugger;
+                                s.val(s.$.val(), true);
                             }
                         } else {
                             // kval postcond
@@ -727,7 +734,7 @@
 
         this.change = function (v) {
             this.cv = v;
-            this.$.val(this.o.format(v));
+            this.$.val(this.o.format(v), false);
         };
 
         this.angle = function (v) {
@@ -787,7 +794,7 @@
         };
 
         this.cancel = function () {
-            this.val(this.v);
+            this.val(this.v, true);
         };
     };
 
